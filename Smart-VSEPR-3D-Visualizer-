@@ -1,0 +1,137 @@
+[07/03/2026 01:30 ص] Sh M: <!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart VSEPR 3D Pro</title>
+    <style>
+        body { margin: 0; background: radial-gradient(circle, #0f2027, #203a43, #2c5364); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+        #ui { position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); z-index: 100; width: 280px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+        h2 { margin: 0 0 15px 0; font-size: 22px; text-align: center; color: #00f2fe; text-shadow: 0 0 10px #00f2fe; }
+        select { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #1a1a1a; color: #00f2fe; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
+        .stat-card { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; margin-top: 10px; border-right: 4px solid #00f2fe; }
+        .label { color: #aaa; font-size: 12px; display: block; }
+        .value { font-size: 18px; font-weight: bold; color: #fff; }
+        #canvas-container { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+
+<div id="ui">
+    <h2>VSEPR Visualizer</h2>
+    <label style="font-size: 14px; opacity: 0.8;">اختر المركب الكيميائي:</label>
+    <select id="moleculeSelect">
+        <option value="linear">CO₂ (Linear)</option>
+        <option value="trigonal">BF₃ (Trigonal Planar)</option>
+        <option value="tetrahedral">CH₄ (Tetrahedral)</option>
+        <option value="bent">H₂O (Bent)</option>
+        <option value="pyramidal">NH₃ (Trigonal Pyramidal)</option>
+    </select>
+
+    <div class="stat-card">
+        <span class="label">الزاوية المتوقعة:</span>
+        <span id="angle" class="value">180°</span>
+    </div>
+    <div class="stat-card">
+        <span class="label">التصنيف (AXE):</span>
+        <span id="type" class="value">AX2</span>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+    let scene, camera, renderer, moleculeGroup, stars;
+
+    function init() {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // إضافة إضاءة سينمائية
+        const light1 = new THREE.PointLight(0x00f2fe, 1, 100);
+        light1.position.set(5, 5, 5);
+        scene.add(light1);
+        const light2 = new THREE.PointLight(0xff00ff, 1, 100);
+        light2.position.set(-5, -5, 5);
+        scene.add(light2);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+
+        // إضافة خلفية نجوم (Stars)
+        const starGeo = new THREE.BufferGeometry();
+        const starCount = 1000;
+        const posArray = new Float32Array(starCount * 3);
+        for(let i=0; i<starCount*3; i++) posArray[i] = (Math.random() - 0.5) * 100;
+        starGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.05}));
+        scene.add(stars);
+
+        moleculeGroup = new THREE.Group();
+        scene.add(moleculeGroup);
+
+        camera.position.z = 6;
+        updateMolecule("linear");
+        animate();
+    }
+
+    function createAtom(color, x, y, z, size, isCentral = false) {
+        const geo = new THREE.SphereGeometry(size, 64, 64);
+        const mat = new THREE.MeshPhongMaterial({ 
+            color: color, 
+            emissive: color, 
+            emissiveIntensity: 0.3,
+            shininess: 100 
+        });
+        const sphere = new THREE.Mesh(geo, mat);
+        sphere.position.set(x, y, z);
+        moleculeGroup.add(sphere);
+    }
+[07/03/2026 01:30 ص] Sh M: function createBond(x2, y2, z2) {
+        const start = new THREE.Vector3(0, 0, 0);
+        const end = new THREE.Vector3(x2, y2, z2);
+        const distance = start.distanceTo(end);
+        const geo = new THREE.CylinderGeometry(0.08, 0.08, distance, 32);
+        const mat = new THREE.MeshPhongMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
+        const bond = new THREE.Mesh(geo, mat);
+        
+        bond.position.copy(start.clone().lerp(end, 0.5));
+        bond.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), end.clone().normalize());
+        moleculeGroup.add(bond);
+    }
+
+    function updateMolecule(type) {
+        moleculeGroup.clear();
+        createAtom(0xffffff, 0, 0, 0, 0.6, true); // الكربون/الذرة المركزية (أبيض)
+
+        const data = {
+            linear: { atoms: [[2.2,0,0], [-2.2,0,0]], angle: "180°", axe: "AX2", color: 0x00f2fe },
+            trigonal: { atoms: [[2,0,0], [-1,1.7,0], [-1,-1.7,0]], angle: "120°", axe: "AX3", color: 0x4facfe },
+            tetrahedral: { atoms: [[0,2,0], [1.8,-0.6,0], [-0.9,-0.6,1.6], [-0.9,-0.6,-1.6]], angle: "109.5°", axe: "AX4", color: 0x00ff87 },
+            bent: { atoms: [[1.5,-1,0], [-1.5,-1,0]], angle: "104.5°", axe: "AX2E2", color: 0xff0055 },
+            pyramidal: { atoms: [[1.5,-0.5,0], [-0.7,-0.5,1.3], [-0.7,-0.5,-1.3]], angle: "107°", axe: "AX3E", color: 0xfccb90 }
+        };
+
+        const config = data[type];
+        config.atoms.forEach(pos => {
+            createAtom(config.color, ...pos, 0.45);
+            createBond(...pos);
+        });
+
+        document.getElementById("angle").innerText = config.angle;
+        document.getElementById("type").innerText = config.axe;
+    }
+
+    document.getElementById("moleculeSelect").addEventListener("change", (e) => updateMolecule(e.target.value));
+
+    function animate() {
+        requestAnimationFrame(animate);
+        moleculeGroup.rotation.y += 0.005;
+        stars.rotation.y -= 0.001;
+        renderer.render(scene, camera);
+    }
+
+    init();
+</script>
+</body>
+</html>
