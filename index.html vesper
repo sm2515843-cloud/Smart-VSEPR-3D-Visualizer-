@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart VSEPR 3D - Ultimate Edition</title>
+    <style>
+        body { margin: 0; background: #050505; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        #ui { position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; border: 1px solid #00f2fe; z-index: 100; width: 300px; box-shadow: 0 0 20px rgba(0, 242, 254, 0.3); }
+        h2 { margin: 0 0 15px 0; font-size: 20px; text-align: center; color: #00f2fe; text-transform: uppercase; letter-spacing: 2px; }
+        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #00f2fe; background: #111; color: #fff; font-size: 14px; outline: none; cursor: pointer; }
+        .info-box { margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 4px solid #00f2fe; }
+        .label { color: #888; font-size: 12px; }
+        .value { font-size: 16px; font-weight: bold; color: #00f2fe; display: block; margin-top: 2px; }
+        #canvas-container { cursor: move; }
+    </style>
+</head>
+<body>
+
+<div id="ui">
+    <h2>VSEPR PRO VISUALIZER</h2>
+    <label style="font-size: 12px; opacity: 0.7;">اختر نوع التهجين / الشكل:</label>
+    <select id="molSelect">
+        <optgroup label="Linear (AX2)">
+            <option value="AX2">AX2 - Linear (180°)</option>
+        </optgroup>
+        <optgroup label="Trigonal Planar (AX3)">
+            <option value="AX3">AX3 - Trigonal Planar (120°)</option>
+            <option value="AX2E">AX2E - Bent (< 120°)</option>
+        </optgroup>
+        <optgroup label="Tetrahedral (AX4)">
+            <option value="AX4">AX4 - Tetrahedral (109.5°)</option>
+            <option value="AX3E">AX3E - Trigonal Pyramidal (107°)</option>
+            <option value="AX2E2">AX2E2 - Bent (104.5°)</option>
+        </optgroup>
+        <optgroup label="Trigonal Bipyramidal (AX5)">
+            <option value="AX5">AX5 - Trigonal Bipyramidal</option>
+            <option value="AX4E">AX4E - Seesaw</option>
+            <option value="AX3E2">AX3E2 - T-Shaped</option>
+            <option value="AX2E3">AX2E3 - Linear</option>
+        </optgroup>
+        <optgroup label="Octahedral (AX6)">
+            <option value="AX6">AX6 - Octahedral (90°)</option>
+            <option value="AX5E">AX5E - Square Pyramidal</option>
+            <option value="AX4E2">AX4E2 - Square Planar</option>
+        </optgroup>
+    </select>
+
+    <div class="info-box">
+        <span class="label">اسم الشكل الهندسي:</span>
+        <span id="shapeName" class="value">Linear</span>
